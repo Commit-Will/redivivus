@@ -594,7 +594,7 @@ void __fastcall TXT_AllocTxt_RareAffixes(D2PoolManagerStrc * pMemory) {
     };
     void* pTxtRareSuffixTmp = DataTbls::CompileTxt(pMemory, "raresuffix", rareaffixes, &nTxtRareSuffixSize, 0x48);
     void* pTxtRarePrefixTmp = DataTbls::CompileTxt(pMemory, "rareprefix", rareaffixes, &nTxtRarePrefixSize, 0x48);
-    gsRareAffixTable.nSize = nTxtRarePrefixSize + nTxtRareSuffixSize;
+    gsRareAffixTable.nSize = nTxtRareSuffixSize + nTxtRarePrefixSize;
     gsRareAffixTable.pTable = (D2RareAffixTxt*)D2_ALLOC_POOL_AT(nullptr, gsRareAffixTable.nSize * 0x48, ".\\DATATBLS\\ItemTbls.cpp", 0x2f4);
     gsRareAffixTable.pSuffixStart = gsRareAffixTable.pTable;
     memcpy(gsRareAffixTable.pTable, pTxtRareSuffixTmp, nTxtRareSuffixSize * 0x48);
