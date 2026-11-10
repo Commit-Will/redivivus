@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install the toolchain
         run: |
@@ -37,9 +39,18 @@ jobs:
         env:
           CHECK_BUILD_WORK: ${{ runner.temp }}/redivivus
           CHECK_BUILD_REPORTS: ${{ runner.temp }}/reports
+          CHECK_BUILD_EXE_OUTPUT: ${{ runner.temp }}/d2.exe
         run: |
           export CCACHE_DIR=$HOME/.cache/ccache CCACHE_MAXSIZE=2G CCACHE_COMPRESS=true
-          tools/check-build.sh "$GITHUB_WORKSPACE" "$GITHUB_SHA"
+          tools/check-build.sh "$GITHUB_WORKSPACE" c43e3f9e9d50c4e1627547963a7da57c25cce882
+
+      - name: Keep the pristine executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: d2-c43e3f9-mingw-i686
+          path: ${{ runner.temp }}/d2.exe
+          retention-days: 30
+          if-no-files-found: error
 
       # Report only: a wrong-direction include between modules fails the build only in
       # a module the module table marks strict.

@@ -116,4 +116,8 @@ awk -F'\t' 'NR>1 && $3=="violation" {p++; h+=$5} END {printf "module gates: %d m
 if [ -n "${CHECK_BUILD_REPORTS:-}" ]; then
   mkdir -p "$CHECK_BUILD_REPORTS" && cp "$GATES" "$GATE_SUMMARY" "$CHECK_BUILD_REPORTS/"
 fi
+if [ -n "${CHECK_BUILD_EXE_OUTPUT:-}" ]; then
+  cp "$WORK/build/d2.exe" "$CHECK_BUILD_EXE_OUTPUT"
+  sha256sum "$CHECK_BUILD_EXE_OUTPUT"
+fi
 echo "OK: d2.exe, $(stat -c %s "$WORK/build/d2.exe" 2>/dev/null || stat -f %z "$WORK/build/d2.exe") bytes"
