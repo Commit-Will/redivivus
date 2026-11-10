@@ -88,4 +88,5 @@ jobs:
             classify-summary.txt
             asm_matching/msvc8/evidence/*.summary
             asm_matching/msvc8/evidence/permodule.tsv
+            asm_matching/msvc8/evidence/audit.tsv
           if-no-files-found: warn
