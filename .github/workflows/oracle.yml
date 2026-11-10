@@ -61,6 +61,17 @@ jobs:
       - name: Build, map and audit every function
         run: asm_matching/msvc8/oracle all
 
+      - name: Record function statuses for A/B
+        run: |
+          awk -F '\t' 'BEGIN { OFS="\t" } NR == 1 { print "start", "name", "status"; next } { print $1, $3, $10 }' asm_matching/msvc8/evidence/audit.tsv > audit-status.tsv
+          grep -i 'ClawViperEx' audit-status.tsv || true
+          {
+            echo '## ClawViperEx audit status'
+            echo '```'
+            grep -i 'ClawViperEx' audit-status.tsv || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Classify every function that differs
         run: asm_matching/msvc8/.venv/bin/python asm_matching/msvc8/scripts/classify.py --out classes.tsv | tee classify-summary.txt
 
@@ -86,6 +97,7 @@ jobs:
           path: |
             classes.tsv
             classify-summary.txt
+            audit-status.tsv
             asm_matching/msvc8/evidence/*.summary
             asm_matching/msvc8/evidence/permodule.tsv
           if-no-files-found: warn
