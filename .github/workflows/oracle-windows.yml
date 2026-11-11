@@ -7,6 +7,10 @@ on:
     paths:
       - 'asm_matching/msvc8/zig/**'
       - '.github/workflows/oracle-windows.yml'
+  # Branch-only integration probe; remove before either PR is merged.
+  push:
+    branches:
+      - experiment/oracle-windows-carve-integration-20261111
 
 permissions:
   contents: read
