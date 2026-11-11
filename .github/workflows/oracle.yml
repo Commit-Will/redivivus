@@ -105,3 +105,10 @@ jobs:
             asm_matching/msvc8/evidence/*.summary
             asm_matching/msvc8/evidence/permodule.tsv
           if-no-files-found: warn
+
+  # Fork-only integration probe. The existing oracle workflow is registered
+  # on the fork's default branch, so workflow_dispatch can call this branch's
+  # new Windows workflow without adding it to the fork default branch.
+  windows_integration:
+    if: github.ref_name == 'experiment/oracle-windows-carve-integration-20261111'
+    uses: ./.github/workflows/oracle-windows.yml
