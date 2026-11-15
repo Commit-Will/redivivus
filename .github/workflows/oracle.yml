@@ -34,6 +34,8 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: dc838217637f0152df1752722b796181179a74c3
 
       - name: Tools (wine, archive tools)
         run: |
@@ -58,7 +60,10 @@ jobs:
 
       - name: Build oracle-zig
         working-directory: asm_matching/msvc8/zig
-        run: zig build --release=fast
+        run: |
+          test "$(git rev-parse HEAD)" = "dc838217637f0152df1752722b796181179a74c3"
+          zig build test
+          zig build --release=fast
 
       - name: Fetch Game.exe 1.14d (not committed; checked by hash)
         run: |
