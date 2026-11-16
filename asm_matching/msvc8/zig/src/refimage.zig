@@ -4,12 +4,13 @@ const std = @import("std");
 const pe_mod = @import("pe.zig");
 const dec = @import("decode.zig");
 const proc = @import("proc.zig");
+const confirmed_starts = @import("confirmed_starts.zig");
 const util = @import("util.zig");
 
 const gpa = util.gpa;
 
 // Reasons, in the alphabetical order Python's sorted() joins them.
-const WHY = [_][]const u8{ "call", "data", "entry", "export", "fptr", "jmp", "pad", "seh", "vtbl" };
+const WHY = [_][]const u8{ "call", "data", "entry", "export", "fptr", "jmp", "pad", "seed", "seh", "vtbl" };
 const W = struct {
     const call = 1 << 0;
     const data = 1 << 1;
@@ -18,8 +19,9 @@ const W = struct {
     const fptr = 1 << 4;
     const jmp = 1 << 5;
     const pad = 1 << 6;
-    const seh = 1 << 7;
-    const vtbl = 1 << 8;
+    const seed = 1 << 7;
+    const seh = 1 << 8;
+    const vtbl = 1 << 9;
 };
 
 /// One row of functions.tsv.
@@ -181,7 +183,7 @@ pub const Reference = struct {
     }
 
     /// refimage.carve: fills `functions`.
-    pub fn carve(r: *Reference) !void {
+    pub fn carve(r: *Reference, confirmed: []const u32) !void {
         const img = &r.img;
         var why: std.AutoArrayHashMapUnmanaged(u32, u16) = .empty;
         const add = struct {
@@ -196,6 +198,10 @@ pub const Reference = struct {
         try add(&why, ts, W.pad);
         var a: u32 = ts + 16;
         while (a < te) : (a += 16) if (r.code[a - ts - 1] == 0xCC and r.code[a - ts] != 0xCC) try add(&why, a, W.pad);
+        for (confirmed) |start| {
+            if (!r.inText(start)) return error.ConfirmedStartOutsideText;
+            try add(&why, start, W.seed);
+        }
         const entry = img.base + img.entry_rva;
         if (r.inText(entry)) try add(&why, entry, W.entry);
         for (try img.exports(gpa)) |v| if (r.inText(v)) try add(&why, v, W.exp);
@@ -467,12 +473,14 @@ fn floorIdx(starts: []const u32, v: u32) ?usize {
     return if (i == 0) null else i - 1;
 }
 
-/// `oracle-zig carve [Game.exe] [functions.tsv]`
+/// `oracle-zig carve [Game.exe] [functions.tsv] [confirmed-starts.tsv]`
 pub fn carveMain(args: []const []const u8) !void {
     const exe = if (args.len > 0) args[0] else "../reference/Game.exe";
     const out = if (args.len > 1) args[1] else "../build/ref/functions.tsv";
+    const evidence = if (args.len > 2) args[2] else "../evidence/confirmed-starts.tsv";
     const r = try Reference.open(exe);
-    try r.carve();
+    const confirmed = try confirmed_starts.read(gpa, try util.readFile(evidence), r.img.data);
+    try r.carve(confirmed);
     try r.writeFunctions(out);
     util.say(try std.fmt.allocPrint(gpa, "{d} functions -> {s}\n", .{ r.starts.len, out }));
 }
