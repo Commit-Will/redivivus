@@ -174,6 +174,10 @@ in order. `oracle-zig quick --root <asm_matching/msvc8>` runs the incremental pi
 both require the VC8 inputs above. On Windows, `all`, `quick`, and `map` carve a missing
 `build/ref/functions.tsv` from the local Game.exe; they do not download the image.
 These commands check Game.exe against the oracle's pinned 1.14d SHA-256 before use.
+Confirmed starts come from `evidence/confirmed-starts.tsv`. The native cache's
+`functions.tsv.inputs` records the image and evidence SHA-256 values; an older
+cache without that record, or changed evidence, causes a fresh carve. Invalid
+evidence or a wrong image leaves the existing reference cache intact.
 The Unix `oracle` Bash wrapper and its build.py fallback are not used by these native
 commands. `all` and `quick` require baseline settings (default `ORACLE_VC=sp1` and no
 custom `ORACLE_CFLAGS`) because they write the baseline evidence directory.

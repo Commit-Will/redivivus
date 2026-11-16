@@ -486,7 +486,8 @@ pub fn carveMain(args: []const []const u8) !void {
 }
 
 /// On a native Windows host the Bash `oracle` wrapper is unavailable. Derive
-/// the reference cache from an already present Game.exe when it is missing.
+/// the reference cache from the image and image-bound confirmed-start evidence.
+/// A cache predating the evidence input, or whose evidence changed, is rebuilt.
 pub fn ensureFunctions(oracle_root: []const u8) !void {
     const exe = try util.join(oracle_root, "reference/Game.exe");
     if (!util.exists(exe)) {
@@ -501,13 +502,24 @@ pub fn ensureFunctions(oracle_root: []const u8) !void {
         std.debug.print("reference image SHA-256 mismatch: {s} has {s}, expected {s}\n", .{ exe, actual, expected });
         return error.ReferenceImageMismatch;
     }
+    const evidence_path = try util.join(oracle_root, "evidence/confirmed-starts.tsv");
+    const evidence = try util.readFile(evidence_path);
+    var evidence_digest: [32]u8 = undefined;
+    std.crypto.hash.sha2.Sha256.hash(evidence, &evidence_digest, .{});
+    const evidence_hash = std.fmt.bytesToHex(evidence_digest, .lower);
+    const key = try std.fmt.allocPrint(gpa, "{s}\t{s}\n", .{ actual, evidence_hash });
     const out = try util.join(oracle_root, "build/ref/functions.tsv");
-    if (util.exists(out)) return;
+    const stamp = try std.mem.concat(gpa, u8, &.{ out, ".inputs" });
+    if (util.exists(out) and util.exists(stamp) and std.mem.eql(u8, try util.readFile(stamp), key)) return;
     util.makeDirs(util.dirname(out));
     const tmp = try std.mem.concat(gpa, u8, &.{ out, ".new" });
     const r = try Reference.open(exe);
-    try r.carve();
+    const confirmed = try confirmed_starts.read(gpa, evidence, r.img.data);
+    try r.carve(confirmed);
     try r.writeFunctions(tmp);
     try proc.rename(tmp, out);
+    const stamp_tmp = try std.mem.concat(gpa, u8, &.{ stamp, ".new" });
+    try util.writeFile(stamp_tmp, key);
+    try proc.rename(stamp_tmp, stamp);
     util.say(try std.fmt.allocPrint(gpa, "{d} functions -> {s}\n", .{ r.starts.len, out }));
 }
