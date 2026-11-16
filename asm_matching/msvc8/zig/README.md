@@ -198,7 +198,8 @@ order from native Windows with Linux in the C locale.
 same candidate commit, and runs the unmodified main Linux pipeline as a control.
 The comparison script requires matching input fingerprints, headline figures,
 total MATCH, library figures, module order, and all five evidence TSV digests across
-hosts. It also compares main when its shipped inputs are identical, checks that
+hosts, including the confirmed-start reference-evidence fingerprint. It also
+compares main when its source and reference inputs are identical, checks that
 the CRT input was preserved, and requires zero MISSING/QUARANTINE and a clean address
 self-check. Counts and output digests are measured within each run rather than
 pinned to one source export. The Windows PR remains experimental until that full
