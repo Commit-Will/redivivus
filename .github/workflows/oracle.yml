@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: Commit-Will/ghidra-reconstruct
-          ref: 0e26ab4cb3aeff11b3cd1d1182fca9da8dda8e3c
+          ref: 97dd1b823824fdd3c5715910f5d43088eb75c0f0
       - uses: pnpm/action-setup@v4
         with:
           version: 11.25.0
@@ -37,7 +37,7 @@ jobs:
         shell: pwsh
         run: |
           $sourceHead = (& git rev-parse HEAD).Trim()
-          if ($sourceHead -ne '0e26ab4cb3aeff11b3cd1d1182fca9da8dda8e3c') { throw 'Unexpected generator revision' }
+          if ($sourceHead -ne '97dd1b823824fdd3c5715910f5d43088eb75c0f0') { throw 'Unexpected generator revision' }
           [ordered]@{
             repository = 'Commit-Will/ghidra-reconstruct'
             sourceHead = $sourceHead
