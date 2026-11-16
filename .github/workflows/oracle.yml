@@ -114,4 +114,9 @@ jobs:
             classify-summary.txt
             asm_matching/msvc8/evidence/*.summary
             asm_matching/msvc8/evidence/permodule.tsv
+            asm_matching/msvc8/evidence/audit.tsv
+            asm_matching/msvc8/evidence/funcmap.tsv
+            asm_matching/msvc8/evidence/libmap.tsv
+            asm_matching/msvc8/evidence/datamap.tsv
+            asm_matching/msvc8/build/ref/functions.tsv
           if-no-files-found: warn
